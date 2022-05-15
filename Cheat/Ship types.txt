@@ -1,0 +1,103 @@
+if (cfg.aim.cannon.b_chain_shots == false && actor->isShip())
+                            {
+                                do
+                                {
+                                    if (actor == localCharacter->GetCurrentShip())
+                                    {
+                                        break;
+                                    }
+                                    FVector location = actor->K2_GetActorLocation();
+                                    if (cfg.aim.cannon.bVisibleOnly && !localController->LineOfSightTo(actor, cameraLoc, false))
+                                    {
+                                        break;
+                                    }
+                                    const FVector forward = actor->GetActorForwardVector();
+                                    const FVector up = actor->GetActorUpVector();
+                                    const FVector loc = actor->K2_GetActorLocation();
+                                    FVector loc_mast = loc;
+                                    loc_mast += up * 130.f;
+                                    location = loc_mast;
+                                    if (location.DistTo(cameraLoc) > 127500)
+                                    {
+                                        break;
+                                    }
+                                    auto cannon = reinterpret_cast<ACannon*>(attachObject);
+                                    int amount = 0;
+                                    auto water = actor->GetInternalWater();
+                                    amount = water->GetNormalizedWaterAmount() * 100.f;
+                                    if (amount == 100)
+                                        break;
+                                    float gravity_scale = cannon->ProjectileGravityScale;
+                                    if (cfg.aim.cannon.randomshots)  <----- where it splits off, it won't work without randomshots on ( you can iterate this with chains and deckshots too, chains is earlier in the code and deckshots is later, but that involves restructing everything and i'm lazy haha)
+                                    {
+                                        
+                                        auto type = actor->GetName();     <----- the code used to get the BP of isShip
+                                        char buf[0x64];
+                                        if (type.find("BP_Small") != std::string::npos)   <----- sloop as described earlier in code to do with visuals and isShip (handy here)
+                                        
+                                        
+                                        {
+                                            int randomnumber = 0; // Number Holder  < --- lazy random shots (still can't figure a way to delay the output without freezing the whole pragram :c)
+
+                                            fn();
+                                            {
+                                                
+                                                int min = -1100; // Back of the Target
+                                                int max = +1900; // Front of the Target
+                                                int randomNum = rand() % max + (min); // Random Number Gen
+                                                randomnumber = randomNum;
+
+
+                                            }
+                                            
+                                            const FVector forward = actor->GetActorForwardVector();
+                                            const FVector up = actor->GetActorUpVector();
+                                            const FVector loc = actor->K2_GetActorLocation();
+                                            FVector loc_mast = loc;
+                                            loc_mast += forward * randomnumber;
+                                            loc_mast += up * 60.f;
+                                            location = loc_mast;
+                                        }
+                                        else if (type.find("BP_Medium") != std::string::npos)
+                                        {
+                                            int randomnumber = 0; // Number Holder
+
+                                            fn();
+                                            {
+
+                                                int min = -1500; // Back of the Target
+                                                int max = +2800; // Front of the Target
+                                                int randomNum = rand() % max + (min); // Random Number Gen
+                                                randomnumber = randomNum; // Changes the value of randomnumber to the value of randomNum
+                                            }
+
+                                            const FVector forward = actor->GetActorForwardVector();
+                                            const FVector up = actor->GetActorUpVector();
+                                            const FVector loc = actor->K2_GetActorLocation();
+                                            FVector loc_mast = loc;
+                                            loc_mast += forward * randomnumber;
+                                            loc_mast += up * 40.f;
+                                            location = loc_mast;
+                                        }
+                                        else if (type.find("BP_Large") != std::string::npos)
+                                        {
+                                            int randomnumber = 0; // Number Holder
+
+                                            fn();
+                                            {
+
+                                                int min = -1950; // Back of the Target
+                                                int max = +4050; // Front of the Target
+                                                int randomNum = rand() % max + (min); // Random Number Gen
+                                                randomnumber = randomNum; // Changes the value of randomnumber to the value of randomNum
+                                            }
+
+                                            const FVector forward = actor->GetActorForwardVector();
+                                            const FVector up = actor->GetActorUpVector();
+                                            const FVector loc = actor->K2_GetActorLocation();
+                                            FVector loc_mast = loc;
+                                            loc_mast += forward * randomnumber;
+                                            loc_mast += up * -400.f;
+                                            location = loc_mast;
+                                        }
+                                    }

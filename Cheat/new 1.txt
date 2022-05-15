@@ -1,0 +1,389 @@
+                    if (cfg.aim.bEnable)
+                    {
+                        if (attachObject && attachObject->isCannon())
+                        {
+                            if (cfg.aim.cannon.b_chain_shots && actor->isShip())
+                            {
+                                do
+                                {
+                                    if (actor == localCharacter->GetCurrentShip())
+                                    {
+                                        break;
+                                    }
+                                    FVector location = actor->K2_GetActorLocation();
+                                    if (location.DistTo(cameraLoc) > 127500)
+                                    {
+                                        break;
+                                    }
+                                    int amount = 0;
+                                    auto water = actor->GetInternalWater();
+                                    amount = water->GetNormalizedWaterAmount() * 100.f;
+                                    if (amount == 100)
+                                    break;
+                                    
+                                    auto cannon = reinterpret_cast<ACannon*>(attachObject);
+                                    float gravity_scale = cannon->ProjectileGravityScale;
+                                    const FVector forward = actor->GetActorForwardVector();
+                                    const FVector up = actor->GetActorUpVector();
+                                    const FVector loc = actor->K2_GetActorLocation();
+                                    FVector loc_mast = loc;
+                                    loc_mast += forward * 0.f;
+                                    loc_mast += up * 1600.f;
+                                    location = loc_mast;
+                                    gravity_scale = 1.f;
+                                    FRotator low, high;
+                                    int i_solutions = AimAtMovingTarget(location, actor->GetVelocity(), cannon->ProjectileSpeed, gravity_scale, cameraLoc, attachObject->GetVelocity(), low, high);
+                                    if (i_solutions < 1)
+                                    break;
+                                    low.Clamp();
+                                    low -= attachObject->K2_GetActorRotation();
+                                    low.Clamp();
+                                    float absPitch = abs(low.Pitch);
+                                    float absYaw = abs(low.Yaw);
+                                    if (absPitch > cfg.aim.cannon.fPitch || absYaw > cfg.aim.cannon.fYaw) { break; }
+                                    float sum = absYaw + absPitch;
+                                    if (sum < aimBest.best)
+                                    {
+                                        aimBest.target = actor;
+                                        aimBest.location = location;
+                                        aimBest.delta = low;
+                                        aimBest.best = sum;                                        
+                                    }
+                                } while (false);
+                            }
+                            if (cfg.aim.cannon.playeraimbot && cfg.aim.cannon.b_chain_shots == false && actor->isPlayer() && actor != localCharacter && !actor->IsDead())
+                            {
+                                do
+                                {
+                                    if (!cfg.aim.players.bTeam) if (UCrewFunctions::AreCharactersInSameCrew(actor, localCharacter)) break;
+                                    FVector location = actor->K2_GetActorLocation();
+                                    if (location.DistTo(cameraLoc) > 127500)
+                                    {
+                                    break;
+                                    }
+                                    auto cannon = reinterpret_cast<ACannon*>(attachObject);
+                                    float gravity_scale = cannon->ProjectileGravityScale;
+                                    FRotator low, high;
+                                    int i_solutions = AimAtMovingTarget(location, actor->GetVelocity(), cannon->ProjectileSpeed, gravity_scale, cameraLoc, attachObject->GetForwardVelocity(), low, high);
+                                    if (i_solutions < 1)
+                                    break;
+                                    low.Clamp();
+                                    low -= attachObject->K2_GetActorRotation();
+                                    low.Clamp();
+                                    float absPitch = abs(low.Pitch);
+                                    float absYaw = abs(low.Yaw);
+                                    if (absPitch > cfg.aim.cannon.fPitch || absYaw > cfg.aim.cannon.fYaw) { break; }
+                                    float sum = absYaw + absPitch;
+                                    if (sum < aimBest.best)
+                                    {
+                                        aimBest.target = actor;
+                                        aimBest.location = location;
+                                        aimBest.delta = low;
+                                        aimBest.best = sum;                                       
+                                    }
+                                } while (false);
+                            }
+                            if (cfg.aim.cannon.skeletonaimbot && cfg.aim.cannon.b_chain_shots == false && actor->isSkeleton() && actor != localCharacter && !actor->IsDead() && !localController->LineOfSightTo(actor, cameraLoc, false))
+                            {
+                                do
+                                {
+                                    FVector location = actor->K2_GetActorLocation();
+                                    if (location.DistTo(cameraLoc) > 127500)
+                                    {
+                                    break;
+                                    }
+                                    auto cannon = reinterpret_cast<ACannon*>(attachObject);
+                                    float gravity_scale = cannon->ProjectileGravityScale;
+                                    FRotator low, high;
+                                    int i_solutions = AimAtMovingTarget(location, actor->GetVelocity(), cannon->ProjectileSpeed, gravity_scale, cameraLoc, attachObject->GetForwardVelocity(), low, high);
+                                    if (i_solutions < 1)
+                                    break;
+                                    low.Clamp();
+                                    low -= attachObject->K2_GetActorRotation();
+                                    low.Clamp();
+                                    float absPitch = abs(low.Pitch);
+                                    float absYaw = abs(low.Yaw);
+                                    if (absPitch > cfg.aim.cannon.fPitch || absYaw > cfg.aim.cannon.fYaw) { break; }
+                                    float sum = absYaw + absPitch;  
+                                    if (sum < aimBest.best)
+                                    {
+                                        aimBest.target = actor;
+                                        aimBest.location = location;
+                                        aimBest.delta = low;
+                                        aimBest.best = sum;                                       
+                                    }
+                                } while (false);
+                            }
+                            if (cfg.aim.cannon.b_chain_shots == false && actor->isShip())
+                            {
+                                do
+                                {
+                                    if (actor == localCharacter->GetCurrentShip())
+                                    {
+                                        break;
+                                    }
+                                    FVector location = actor->K2_GetActorLocation();
+                                    if (cfg.aim.cannon.bVisibleOnly && !localController->LineOfSightTo(actor, cameraLoc, false))
+                                    {
+                                        break;
+                                    }
+                                    const FVector forward = actor->GetActorForwardVector();
+                                    const FVector up = actor->GetActorUpVector();
+                                    const FVector loc = actor->K2_GetActorLocation();
+                                    FVector loc_mast = loc;
+                                    loc_mast += up;
+                                    location = loc_mast;
+                                    if (location.DistTo(cameraLoc) > 127500)
+                                    {
+                                        break;
+                                    }
+                                    auto cannon = reinterpret_cast<ACannon*>(attachObject);
+                                    int amount = 0;
+                                    auto water = actor->GetInternalWater();
+                                    amount = water->GetNormalizedWaterAmount() * 100.f;
+                                    if (amount == 100)
+                                        break;
+                                    float gravity_scale = cannon->ProjectileGravityScale;
+                                    auto type = actor->GetName();
+                                    char buf[0x64];
+                                    if (type.find("BP_Small") != std::string::npos)
+                                    {
+
+                                        const FVector forward = actor->GetActorForwardVector();
+                                        const FVector up = actor->GetActorUpVector();
+                                        const FVector loc = actor->K2_GetActorLocation();
+                                        FVector loc_mast = loc;
+                                        loc_mast += forward * 30;
+                                        loc_mast += up * 40.f;
+                                        location = loc_mast;
+                                        if (cfg.aim.cannon.randomshots) 
+                                        {
+
+                                            int randomnumber = 0; // Number Holder    
+                                            {
+                                                    fn();
+                                                    int min = -1000; // Back of the Target
+                                                    int max = +1800; // Front of the Target
+                                                    int randomNum = rand() % max + (min); // Random Number Gen
+                                                    randomnumber = randomNum; // Changes th
+                                                    
+                                            }
+                                            const FVector forward = actor->GetActorForwardVector();
+                                            const FVector up = actor->GetActorUpVector();
+                                            const FVector loc = actor->K2_GetActorLocation();
+                                            FVector loc_mast = loc;
+                                            loc_mast += forward * randomnumber;
+                                            loc_mast += up * 40.f;
+                                            location = loc_mast;
+                                        }
+                                    }
+                                    else if (type.find("BP_Medium") != std::string::npos)
+                                    {
+                                        const FVector forward = actor->GetActorForwardVector();
+                                        const FVector up = actor->GetActorUpVector();
+                                        const FVector loc = actor->K2_GetActorLocation();
+                                        FVector loc_mast = loc;
+                                        loc_mast += forward * 60;
+                                        loc_mast += up * 22.f;
+                                        location = loc_mast;
+                                        if (cfg.aim.cannon.randomshots)
+                                        {
+
+                                            int randomnumber = 0; // Number Holder    
+                                            {
+                                                fn();
+                                                int min = -1500; // Back of the Target
+                                                int max = +2700; // Front of the Target
+                                                int randomNum = rand() % max + (min); // Random Number Gen
+                                                randomnumber = randomNum; // Changes th
+
+                                            }
+                                            const FVector forward = actor->GetActorForwardVector();
+                                            const FVector up = actor->GetActorUpVector();
+                                            const FVector loc = actor->K2_GetActorLocation();
+                                            FVector loc_mast = loc;
+                                            loc_mast += forward * randomnumber;
+                                            loc_mast += up * 22.f;
+                                            location = loc_mast;
+                                        }
+                                    }
+                                    else if (type.find("BP_Large") != std::string::npos)
+                                    {
+                                        const FVector forward = actor->GetActorForwardVector();
+                                        const FVector up = actor->GetActorUpVector();
+                                        const FVector loc = actor->K2_GetActorLocation();
+                                        FVector loc_mast = loc;
+                                        loc_mast += forward * 70;
+                                        loc_mast += up * -410.f;
+                                        location = loc_mast;
+                                        if (cfg.aim.cannon.randomshots)
+                                        {
+
+                                            int randomnumber = 0; // Number Holder    
+                                            {
+                                                fn();
+                                                int min = -1950; // Back of the Target
+                                                int max = +4050; // Front of the Target
+                                                int randomNum = rand() % max + (min); // Random Number Gen
+                                                randomnumber = randomNum; // Changes th
+
+                                            }
+                                            const FVector forward = actor->GetActorForwardVector();
+                                            const FVector up = actor->GetActorUpVector();
+                                            const FVector loc = actor->K2_GetActorLocation();
+                                            FVector loc_mast = loc;
+                                            loc_mast += forward * randomnumber;
+                                            loc_mast += up * -410.f;
+                                            location = loc_mast;
+                                        }
+                                    }
+                                    if (cfg.aim.cannon.deckshots)
+                                    {
+                                        const FVector forward = actor->GetActorForwardVector();
+                                        const FVector up = actor->GetActorUpVector();
+                                        const FVector loc = actor->K2_GetActorLocation();
+                                        FVector loc_mast = loc;
+                                        loc_mast += forward * 92.f;
+                                        loc_mast += up * 220.f;
+                                        location = loc_mast;
+                                        gravity_scale = 1.30f;
+                                    }
+                                    FRotator low, high;
+                                    int i_solutions = AimAtMovingTarget(location, actor->GetVelocity(), cannon->ProjectileSpeed, gravity_scale, cameraLoc, attachObject->GetVelocity(), low, high);
+                                    if (i_solutions < 1)
+                                    break;
+                                    low.Clamp();
+                                    low -= attachObject->K2_GetActorRotation();
+                                    low.Clamp();
+                                    float absPitch = abs(low.Pitch);
+                                    float absYaw = abs(low.Yaw);
+                                    if (absPitch > cfg.aim.cannon.fPitch || absYaw > cfg.aim.cannon.fYaw) { break; }
+                                    float sum = absYaw + absPitch;
+                                    if (sum < aimBest.best)
+                                    {
+                                        aimBest.target = actor;
+                                        aimBest.location = location;
+                                        aimBest.delta = low;
+                                        aimBest.best = sum;
+                                    }
+                                } while (false);
+                            }
+                        }                        
+                        else if (!attachObject && isWieldedWeapon)
+                        {
+                            if (cfg.aim.players.bEnable && actor->isPlayer() && actor != localCharacter && !actor->IsDead())
+                            {
+                                do
+                                {
+                                    FVector playerLoc = actor->K2_GetActorLocation();
+                                    if (!actor->IsInWater() && localWeapon->WeaponParameters.NumberOfProjectiles == 1)
+                                    {
+                                        playerLoc.Z += cfg.aim.players.fAimHeight;
+                                    }
+                                    float dist = localLoc.DistTo(playerLoc);
+                                    if (dist > localWeapon->WeaponParameters.ProjectileMaximumRange) { break; }
+                                    if (cfg.aim.players.bVisibleOnly) if (!localController->LineOfSightTo(actor, cameraLoc, false)) { break; }
+                                    if (!cfg.aim.players.bTeam) if (UCrewFunctions::AreCharactersInSameCrew(actor, localCharacter)) break;
+                                    FRotator rotationDelta = UKismetMathLibrary::NormalizedDeltaRotator(UKismetMathLibrary::FindLookAtRotation(cameraLoc, playerLoc), cameraRot);
+                                    float absYaw = abs(rotationDelta.Yaw);
+                                    float absPitch = abs(rotationDelta.Pitch);
+                                    if (absYaw > cfg.aim.players.fYaw || absPitch > cfg.aim.players.fPitch) { break; }
+                                    float sum = absYaw + absPitch;
+                                    if (sum < aimBest.best)
+                                    {
+                                        aimBest.target = actor;
+                                        aimBest.location = playerLoc;
+                                        aimBest.delta = rotationDelta;
+                                        aimBest.best = sum;
+                                        aimBest.smoothness = cfg.aim.players.fSmoothness;
+                                    }
+
+                                } while (false);
+                            
+                            }
+                            else if (cfg.aim.skeletons.bEnable && actor->isSkeleton() && !actor->IsDead())
+                            {
+                                do
+                                {
+                                    FVector playerLoc = actor->K2_GetActorLocation();
+                                    if (localWeapon->WeaponParameters.NumberOfProjectiles == 1)
+                                    playerLoc.Z += cfg.aim.skeletons.fAimHeight;
+                                    const float dist = localLoc.DistTo(playerLoc);
+                                    if (dist > localWeapon->WeaponParameters.ProjectileMaximumRange) break;
+                                    if (cfg.aim.skeletons.bVisibleOnly) if (!localController->LineOfSightTo(actor, cameraLoc, false)) break;
+                                    const FRotator rotationDelta = UKismetMathLibrary::NormalizedDeltaRotator(UKismetMathLibrary::FindLookAtRotation(cameraLoc, playerLoc), cameraRot);
+                                    const float absYaw = abs(rotationDelta.Yaw);
+                                    const float absPitch = abs(rotationDelta.Pitch);
+                                    if (absYaw > cfg.aim.skeletons.fYaw || absPitch > cfg.aim.skeletons.fPitch) break;
+                                    const float sum = absYaw + absPitch;
+                                    if (sum < aimBest.best)
+                                    {
+                                        aimBest.target = actor;
+                                        aimBest.location = playerLoc;
+                                        aimBest.delta = rotationDelta;
+                                        aimBest.best = sum;
+                                        aimBest.smoothness = cfg.aim.skeletons.fSmoothness;
+                                    }
+
+                                } while (false);
+                            }
+                        }
+                    }
+                }
+            }
+            if (aimBest.target != nullptr)
+            {
+                FVector2D screen;
+                if (localController->ProjectWorldLocationToScreen(aimBest.location, screen))
+                {
+                    auto col = ImGui::GetColorU32(IM_COL32(0, 200, 0, 255));
+                    drawList->AddLine({ io.DisplaySize.x * 0.5f , io.DisplaySize.y * 0.5f }, { screen.X, screen.Y }, col);
+                    drawList->AddCircle({ screen.X, screen.Y }, 3.f, col);
+                }
+                if (ImGui::IsMouseDown(1))
+                {
+                    if (attachObject && attachObject->isCannon())
+                    {                       
+                        auto cannon = reinterpret_cast<ACannon*>(attachObject);                       
+                        if (cannon)
+                        {
+                            if (((aimBest.delta.Pitch > cannon->PitchRange.max) || (aimBest.delta.Pitch < cannon->PitchRange.min)) || ((aimBest.delta.Yaw > cannon->YawRange.max) || (aimBest.delta.Yaw < cannon->YawRange.min)))
+                            {
+                                std::string str_text_message = "TARGET IS OUT OF RANGE!";
+                                drawList->AddText({ io.DisplaySize.x * 0.5f , io.DisplaySize.y * 0.5f + 30.f }, 0xFFFFFFFF, str_text_message.c_str());
+                            }
+                            else
+                            {
+                                cannon->ForceAimCannon(aimBest.delta.Pitch, aimBest.delta.Yaw); 
+                            }
+                        }
+                    }
+                    else
+                    {
+                        FVector LV = localCharacter->GetVelocity();
+                        if (auto const localShip = localCharacter->GetCurrentShip()) LV += localShip->GetVelocity();
+                        FVector TV = aimBest.target->GetVelocity();
+                        if (auto const targetShip = aimBest.target->GetCurrentShip()) TV += targetShip->GetVelocity();
+                        const FVector RV = TV - LV;
+                        const float BS = localWeapon->WeaponParameters.AmmoParams.Velocity;
+                        const FVector RL = localLoc - aimBest.location;
+                        const float a = RV.Size() - BS * BS;
+                        const float b = (RL * RV * 2.f).Sum();
+                        const float c = RL.SizeSquared();
+                        const float D = b*b - 4 * a * c;
+                        if (D > 0)
+                        {
+                            const float DRoot = sqrtf(D);
+                            const float x1 = (-b + DRoot) / (2 * a);
+                            const float x2 = (-b - DRoot) / (2 * a);
+                            if (x1 >= 0 && x1 >= x2) aimBest.location += RV * x1;
+                            else if (x2 >= 0) aimBest.location += RV * x2;
+                            aimBest.delta = UKismetMathLibrary::NormalizedDeltaRotator(UKismetMathLibrary::FindLookAtRotation(cameraLoc, aimBest.location), cameraRot);
+                            auto smoothness = 1.f / aimBest.smoothness;
+                            localController->AddYawInput(aimBest.delta.Yaw * smoothness);
+                            localController->AddPitchInput(aimBest.delta.Pitch * -smoothness);
+                        }
+                    }
+                }
+            }
+        }while (false);
